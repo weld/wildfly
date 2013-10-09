@@ -118,6 +118,14 @@ public class WeldClassFileServicesTest {
     }
 
     @Test
+    public void testIsAssignableFromObject() {
+        Assert.assertFalse(alpha.isAssignableFrom(Object.class));
+        Assert.assertFalse(abstractAlpha.isAssignableFrom(Object.class));
+        Assert.assertFalse(alphaImpl.isAssignableFrom(Object.class));
+        Assert.assertFalse(bravo.isAssignableFrom(Object.class));
+    }
+
+    @Test
     public void testIsAnnotationDeclared() {
         Assert.assertTrue(alpha.isAnnotationDeclared(Vetoed.class));
         Assert.assertTrue(innerInterface.isAnnotationDeclared(Named.class));
