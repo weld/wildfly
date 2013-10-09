@@ -43,11 +43,11 @@ public class WeldClassFileInfo implements ClassFileInfo {
 
     private static final DotName OBJECT_NAME = DotName.createSimple(Object.class.getName());
 
-    private final static String CONSTRUCTOR_METHOD_NAME = "<init>";
+    private static final String CONSTRUCTOR_METHOD_NAME = "<init>";
 
-    private final static String PACKAGE_INFO_NAME = "package-info";
+    private static final String PACKAGE_INFO_NAME = "package-info";
 
-    private final static String DOT_SEPARATOR = ".";
+    private static final String DOT_SEPARATOR = ".";
 
     private final ClassInfo classInfo;
 
