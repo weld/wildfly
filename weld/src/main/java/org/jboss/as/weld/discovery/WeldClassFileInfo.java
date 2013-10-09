@@ -192,6 +192,9 @@ public class WeldClassFileInfo implements ClassFileInfo {
         if (name.equals(fromName)) {
             return true;
         }
+        if (OBJECT_NAME.equals(fromName)) {
+            return false; // there's nothing assignable from Object.class except for Object.class
+        }
 
         ClassInfo fromClassInfo = index.getClassByName(fromName);
         if (fromClassInfo == null) {
@@ -200,7 +203,7 @@ public class WeldClassFileInfo implements ClassFileInfo {
 
         DotName superName = fromClassInfo.superName();
 
-        if (superName != null && !OBJECT_NAME.equals(superName) && isAssignableFrom(name, superName)) {
+        if (superName != null && isAssignableFrom(name, superName)) {
             return true;
         }
 
