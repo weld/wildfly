@@ -68,7 +68,7 @@ public class WeldClassFileInfo implements ClassFileInfo {
         if (this.classInfo == null) {
             throw WeldMessages.MESSAGES.nameNotFoundInIndex(className);
         }
-        this.isVetoed = isVetoedTypeOrPackage(index);
+        this.isVetoed = isVetoedTypeOrPackage();
         this.hasCdiConstructor = this.classInfo.isTopLevelWithNoArgsConstructor() || hasInjectConstructor();
     }
 
@@ -99,12 +99,12 @@ public class WeldClassFileInfo implements ClassFileInfo {
 
     @Override
     public boolean isAssignableFrom(Class<?> fromClass) {
-        return isNameEqualOrSuperType(classInfo.name(), DotName.createSimple(fromClass.getName()));
+        return isAssignableFrom(classInfo.name(), DotName.createSimple(fromClass.getName()));
     }
 
     @Override
     public boolean isAssignableTo(Class<?> toClass) {
-        return isNameEqualOrSuperType(DotName.createSimple(toClass.getName()), classInfo.name());
+        return isAssignableFrom(DotName.createSimple(toClass.getName()), classInfo.name());
     }
 
     @Override
@@ -124,7 +124,7 @@ public class WeldClassFileInfo implements ClassFileInfo {
         return classInfo.superName().toString();
     }
 
-    private boolean isVetoedTypeOrPackage(CompositeIndex index) {
+    private boolean isVetoedTypeOrPackage() {
 
         if (isAnnotationDeclared(classInfo, DOT_NAME_VETOED)) {
             return true;
@@ -171,7 +171,6 @@ public class WeldClassFileInfo implements ClassFileInfo {
     }
 
     private String getPackageName(DotName name) {
-
         // TODO https://issues.jboss.org/browse/JANDEX-20
         // String packageName;
         // if (name.isComponentized()) {
@@ -185,28 +184,29 @@ public class WeldClassFileInfo implements ClassFileInfo {
 
     /**
      * @param name
-     * @param targetName
-     * @return
+     * @param fromName
+     * @return <code>true</code> if the name is equal to the fromName, or if the name represents a superclass or superinterface of the fromName,
+     *         <code>false</code> otherwise
      */
-    private boolean isNameEqualOrSuperType(DotName name, DotName targetName) {
-        if (name.equals(targetName)) {
+    private boolean isAssignableFrom(DotName name, DotName fromName) {
+        if (name.equals(fromName)) {
             return true;
         }
 
-        ClassInfo startClassInfo = index.getClassByName(targetName);
-        if (startClassInfo == null) {
-            throw WeldMessages.MESSAGES.nameNotFoundInIndex(targetName.toString());
+        ClassInfo fromClassInfo = index.getClassByName(fromName);
+        if (fromClassInfo == null) {
+            throw WeldMessages.MESSAGES.nameNotFoundInIndex(fromName.toString());
         }
 
-        DotName superName = startClassInfo.superName();
+        DotName superName = fromClassInfo.superName();
 
-        if (superName != null && !OBJECT_NAME.equals(superName) && isNameEqualOrSuperType(name, superName)) {
+        if (superName != null && !OBJECT_NAME.equals(superName) && isAssignableFrom(name, superName)) {
             return true;
         }
 
-        if (startClassInfo.interfaces() != null) {
-            for (DotName interfaceName : startClassInfo.interfaces()) {
-                if (isNameEqualOrSuperType(name, interfaceName)) {
+        if (fromClassInfo.interfaces() != null) {
+            for (DotName interfaceName : fromClassInfo.interfaces()) {
+                if (isAssignableFrom(name, interfaceName)) {
                     return true;
                 }
             }
