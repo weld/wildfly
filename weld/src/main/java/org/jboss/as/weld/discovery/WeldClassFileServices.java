@@ -67,9 +67,11 @@ public class WeldClassFileServices implements ClassFileServices {
 
     @Override
     public void cleanupAfterBoot() {
+        if (weldClassInfoCache != null) {
+            this.weldClassInfoCache.invalidateAll();
+            this.weldClassInfoCache = null;
+        }
         this.index = null;
-        this.weldClassInfoCache.invalidateAll();
-        this.weldClassInfoCache = null;
     }
 
     @Override
