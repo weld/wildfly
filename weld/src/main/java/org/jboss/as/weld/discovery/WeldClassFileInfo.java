@@ -23,6 +23,7 @@ import javax.enterprise.inject.Vetoed;
 import javax.inject.Inject;
 
 import org.jboss.as.server.deployment.annotation.CompositeIndex;
+import org.jboss.as.weld.WeldMessages;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.ClassInfo;
@@ -48,7 +49,11 @@ public class WeldClassFileInfo implements ClassFileInfo {
 
     private final ClassInfo classInfo;
 
+    private final CompositeIndex index;
+
     private final boolean isVetoed;
+
+    private final boolean hasCdiConstructor;
 
     /**
      *
@@ -56,9 +61,13 @@ public class WeldClassFileInfo implements ClassFileInfo {
      * @param index
      */
     public WeldClassFileInfo(String className, CompositeIndex index) {
-        // TODO what if a class is not found in jandex
+        this.index = index;
         this.classInfo = index.getClassByName(DotName.createSimple(className));
-        this.isVetoed = initVetoed(index);
+        if (this.classInfo == null) {
+            throw WeldMessages.MESSAGES.nameNotFoundInIndex(className);
+        }
+        this.isVetoed = isVetoedTypeOrPackage(index);
+        this.hasCdiConstructor = this.classInfo.isTopLevelWithNoArgsConstructor() || hasInjectConstructor();
     }
 
     @Override
@@ -78,19 +87,17 @@ public class WeldClassFileInfo implements ClassFileInfo {
 
     @Override
     public boolean hasCdiConstructor() {
-        return classInfo.isTopLevelWithNoArgsConstructor() || hasInjectConstructor();
+        return hasCdiConstructor;
     }
 
     @Override
-    public boolean isAssignableFrom(Class<?> javaClass) {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean isAssignableFrom(Class<?> fromClass) {
+        return isNameEqualOrSuperType(classInfo.name(), DotName.createSimple(fromClass.getName()));
     }
 
     @Override
-    public boolean isAssignableTo(Class<?> javaClass) {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean isAssignableTo(Class<?> toClass) {
+        return isNameEqualOrSuperType(DotName.createSimple(toClass.getName()), classInfo.name());
     }
 
     @Override
@@ -110,7 +117,7 @@ public class WeldClassFileInfo implements ClassFileInfo {
         return classInfo.superName().toString();
     }
 
-    private boolean initVetoed(CompositeIndex index) {
+    private boolean isVetoedTypeOrPackage(CompositeIndex index) {
 
         if (isAnnotationPresent(classInfo, DOT_NAME_VETOED)) {
             return true;
@@ -165,6 +172,37 @@ public class WeldClassFileInfo implements ClassFileInfo {
         // }
         // return packageName;
         return name.toString().substring(0, name.toString().lastIndexOf("."));
+    }
+
+    /**
+     * @param name
+     * @param targetName
+     * @return
+     */
+    private boolean isNameEqualOrSuperType(DotName name, DotName targetName) {
+        if (name.equals(targetName)) {
+            return true;
+        }
+
+        ClassInfo startClassInfo = index.getClassByName(targetName);
+        if (startClassInfo == null) {
+            throw WeldMessages.MESSAGES.nameNotFoundInIndex(targetName.toString());
+        }
+
+        DotName superName = startClassInfo.superName();
+
+        if (superName != null && isNameEqualOrSuperType(name, superName)) {
+            return true;
+        }
+
+        if (startClassInfo.interfaces() != null) {
+            for (DotName interfaceName : startClassInfo.interfaces()) {
+                if (isNameEqualOrSuperType(name, interfaceName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

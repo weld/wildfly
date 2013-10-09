@@ -19,6 +19,7 @@ package org.jboss.as.weld.discovery;
 import java.util.concurrent.ExecutionException;
 
 import org.jboss.as.server.deployment.annotation.CompositeIndex;
+import org.jboss.as.weld.WeldMessages;
 import org.jboss.weld.resources.spi.ClassFileInfo;
 import org.jboss.weld.resources.spi.ClassFileServices;
 
@@ -49,7 +50,7 @@ public class WeldClassFileServices implements ClassFileServices {
      */
     public WeldClassFileServices(CompositeIndex index) {
         if (index == null) {
-            throw new IllegalArgumentException("Index must be set");
+            throw WeldMessages.MESSAGES.cannotUseAtRuntime(ClassFileServices.class.getSimpleName());
         }
         this.index = index;
         this.weldClassInfoCache = CacheBuilder.newBuilder().build(new WeldClassInfoLoader());
