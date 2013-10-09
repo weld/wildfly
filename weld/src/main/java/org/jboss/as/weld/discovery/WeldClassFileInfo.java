@@ -102,7 +102,7 @@ public class WeldClassFileInfo implements ClassFileInfo {
     public boolean isTopLevelClass() {
         // TODO This is not portable per the JSL
         // TODO Modify jandex to contain isTopLevelClass attribute
-        return classInfo.name().local().contains("$");
+        return !classInfo.name().local().contains("$");
     }
 
     @Override
@@ -130,9 +130,11 @@ public class WeldClassFileInfo implements ClassFileInfo {
 
     private boolean isAnnotationPresent(ClassInfo classInfo, DotName requiredAnnotationName) {
         List<AnnotationInstance> annotations = classInfo.annotations().get(requiredAnnotationName);
-        for (AnnotationInstance annotationInstance : annotations) {
-            if (annotationInstance.target().equals(classInfo)) {
-                return true;
+        if (annotations != null) {
+            for (AnnotationInstance annotationInstance : annotations) {
+                if (annotationInstance.target().equals(classInfo)) {
+                    return true;
+                }
             }
         }
         return false;
