@@ -24,6 +24,12 @@ package org.jboss.as.weld.discovery;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 
+import javax.enterprise.inject.Vetoed;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.jboss.as.weld.discovery.InnerClasses.InnerInterface;
+import org.jboss.as.weld.discovery.vetoed.Bravo;
 import org.jboss.weld.resources.spi.ClassFileInfo;
 import org.jboss.weld.resources.spi.ClassFileServices;
 import org.junit.Assert;
@@ -36,14 +42,18 @@ public class WeldClassFileServicesTest {
     private static ClassFileInfo abstractAlpha;
     private static ClassFileInfo alphaImpl;
     private static ClassFileInfo innerInterface;
+    private static ClassFileInfo bravo;
 
     @BeforeClass
     public static void init() throws IOException {
-        ClassFileServices service = new WeldClassFileServices(IndexUtils.createIndex(Alpha.class, AlphaImpl.class, AbstractAlpha.class, InnerClasses.class));
+        ClassFileServices service = new WeldClassFileServices(IndexUtils.createIndex(Alpha.class, AlphaImpl.class, AbstractAlpha.class, InnerClasses.class,
+                Bravo.class, "org/jboss/as/weld/discovery/vetoed/package-info.class", Inject.class, Named.class));
         alpha = service.getClassFileInfo(Alpha.class.getName());
         abstractAlpha = service.getClassFileInfo(AbstractAlpha.class.getName());
         alphaImpl = service.getClassFileInfo(AlphaImpl.class.getName());
         innerInterface = service.getClassFileInfo(InnerClasses.InnerInterface.class.getName());
+        bravo = service.getClassFileInfo(Bravo.class.getName());
+
     }
 
     @Test
@@ -62,6 +72,7 @@ public class WeldClassFileServicesTest {
         Assert.assertTrue(alpha.isVetoed());
         Assert.assertFalse(abstractAlpha.isVetoed());
         Assert.assertFalse(alphaImpl.isVetoed());
+        Assert.assertTrue(bravo.isVetoed());
     }
 
     @Test
@@ -77,5 +88,42 @@ public class WeldClassFileServicesTest {
         Assert.assertTrue(alpha.isTopLevelClass());
         Assert.assertTrue(alpha.isTopLevelClass());
         Assert.assertFalse(innerInterface.isTopLevelClass());
+    }
+
+    @Test
+    public void testIsAssignableFrom() {
+        Assert.assertTrue(alpha.isAssignableFrom(AlphaImpl.class));
+        Assert.assertTrue(abstractAlpha.isAssignableFrom(AlphaImpl.class));
+        Assert.assertFalse(abstractAlpha.isAssignableFrom(Alpha.class));
+        Assert.assertTrue(innerInterface.isAssignableFrom(Bravo.class));
+        Assert.assertTrue(alphaImpl.isAssignableFrom(Bravo.class));
+    }
+
+    @Test
+    public void testIsAssignableTo() {
+        Assert.assertTrue(alphaImpl.isAssignableTo(Alpha.class));
+        Assert.assertTrue(abstractAlpha.isAssignableTo(Alpha.class));
+        Assert.assertFalse(abstractAlpha.isAssignableTo(AlphaImpl.class));
+        Assert.assertTrue(bravo.isAssignableTo(InnerInterface.class));
+        Assert.assertTrue(bravo.isAssignableTo(AbstractAlpha.class));
+        Assert.assertFalse(bravo.isAssignableTo(InnerClasses.class));
+    }
+
+    @Test
+    public void testIsAnnotationDeclared() {
+        Assert.assertTrue(alpha.isAnnotationDeclared(Vetoed.class));
+        Assert.assertTrue(innerInterface.isAnnotationDeclared(Named.class));
+        Assert.assertFalse(bravo.isAnnotationDeclared(Vetoed.class));
+        Assert.assertFalse(bravo.isAnnotationDeclared(Named.class));
+        Assert.assertFalse(bravo.isAnnotationDeclared(Inject.class));
+    }
+
+    @Test
+    public void testContainsAnnotation() {
+        Assert.assertTrue(alpha.containsAnnotation(Vetoed.class));
+        Assert.assertTrue(innerInterface.containsAnnotation(Named.class));
+        Assert.assertFalse(bravo.containsAnnotation(Vetoed.class));
+        Assert.assertFalse(bravo.containsAnnotation(Named.class));
+        Assert.assertTrue(bravo.containsAnnotation(Inject.class));
     }
 }

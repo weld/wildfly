@@ -41,6 +41,8 @@ public class WeldClassFileInfo implements ClassFileInfo {
 
     private static final DotName DOT_NAME_VETOED = DotName.createSimple(Vetoed.class.getName());
 
+    private static final DotName OBJECT_NAME = DotName.createSimple(Object.class.getName());
+
     private final static String CONSTRUCTOR_METHOD_NAME = "<init>";
 
     private final static String PACKAGE_INFO_NAME = "package-info";
@@ -76,8 +78,13 @@ public class WeldClassFileInfo implements ClassFileInfo {
     }
 
     @Override
-    public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
-        return isAnnotationPresent(classInfo, annotation);
+    public boolean isAnnotationDeclared(Class<? extends Annotation> annotation) {
+        return isAnnotationDeclared(classInfo, annotation);
+    }
+
+    @Override
+    public boolean containsAnnotation(Class<? extends Annotation> annotation) {
+        return containsAnnotation(classInfo, DotName.createSimple(annotation.getName()));
     }
 
     @Override
@@ -119,23 +126,23 @@ public class WeldClassFileInfo implements ClassFileInfo {
 
     private boolean isVetoedTypeOrPackage(CompositeIndex index) {
 
-        if (isAnnotationPresent(classInfo, DOT_NAME_VETOED)) {
+        if (isAnnotationDeclared(classInfo, DOT_NAME_VETOED)) {
             return true;
         }
 
         ClassInfo packageInfo = index.getClassByName(DotName.createSimple(getPackageName(classInfo.name()) + DOT_SEPARATOR + PACKAGE_INFO_NAME));
 
-        if (packageInfo != null && isAnnotationPresent(packageInfo, DOT_NAME_VETOED)) {
+        if (packageInfo != null && isAnnotationDeclared(packageInfo, DOT_NAME_VETOED)) {
             return true;
         }
         return false;
     }
 
-    private boolean isAnnotationPresent(ClassInfo classInfo, Class<? extends Annotation> annotation) {
-        return isAnnotationPresent(classInfo, DotName.createSimple(annotation.getName()));
+    private boolean isAnnotationDeclared(ClassInfo classInfo, Class<? extends Annotation> annotation) {
+        return isAnnotationDeclared(classInfo, DotName.createSimple(annotation.getName()));
     }
 
-    private boolean isAnnotationPresent(ClassInfo classInfo, DotName requiredAnnotationName) {
+    private boolean isAnnotationDeclared(ClassInfo classInfo, DotName requiredAnnotationName) {
         List<AnnotationInstance> annotations = classInfo.annotations().get(requiredAnnotationName);
         if (annotations != null) {
             for (AnnotationInstance annotationInstance : annotations) {
@@ -149,12 +156,14 @@ public class WeldClassFileInfo implements ClassFileInfo {
 
     private boolean hasInjectConstructor() {
         List<AnnotationInstance> annotationInstances = classInfo.annotations().get(DOT_NAME_INJECT);
-        for (AnnotationInstance instance : annotationInstances) {
-            AnnotationTarget target = instance.target();
-            if (target instanceof MethodInfo) {
-                MethodInfo methodInfo = (MethodInfo) target;
-                if (methodInfo.name().equals(CONSTRUCTOR_METHOD_NAME)) {
-                    return true;
+        if (annotationInstances != null) {
+            for (AnnotationInstance instance : annotationInstances) {
+                AnnotationTarget target = instance.target();
+                if (target instanceof MethodInfo) {
+                    MethodInfo methodInfo = (MethodInfo) target;
+                    if (methodInfo.name().equals(CONSTRUCTOR_METHOD_NAME)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -191,7 +200,7 @@ public class WeldClassFileInfo implements ClassFileInfo {
 
         DotName superName = startClassInfo.superName();
 
-        if (superName != null && isNameEqualOrSuperType(name, superName)) {
+        if (superName != null && !OBJECT_NAME.equals(superName) && isNameEqualOrSuperType(name, superName)) {
             return true;
         }
 
@@ -200,6 +209,36 @@ public class WeldClassFileInfo implements ClassFileInfo {
                 if (isNameEqualOrSuperType(name, interfaceName)) {
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    private boolean containsAnnotation(ClassInfo classInfo, DotName requiredAnnotationName) {
+        // Type and members
+        if (classInfo.annotations().containsKey(requiredAnnotationName)) {
+            return true;
+        }
+        // Meta-annotations
+        for (DotName annotation : classInfo.annotations().keySet()) {
+            ClassInfo annotationClassInfo = index.getClassByName(annotation);
+            if (annotationClassInfo == null) {
+                throw WeldMessages.MESSAGES.nameNotFoundInIndex(annotation.toString());
+            }
+            if (annotationClassInfo.annotations().containsKey(requiredAnnotationName)) {
+                return true;
+            }
+        }
+        // Superclass
+        final DotName superName = classInfo.superName();
+
+        if (superName != null && !OBJECT_NAME.equals(superName)) {
+            final ClassInfo superClassInfo = index.getClassByName(superName);
+            if (superClassInfo == null) {
+                throw WeldMessages.MESSAGES.nameNotFoundInIndex(superName.toString());
+            }
+            if (containsAnnotation(superClassInfo, requiredAnnotationName)) {
+                return true;
             }
         }
         return false;
