@@ -18,6 +18,8 @@ package org.jboss.as.weld.discovery;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import javax.enterprise.inject.Vetoed;
 import javax.inject.Inject;
@@ -30,6 +32,8 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.weld.resources.spi.ClassFileInfo;
+
+import com.google.common.cache.LoadingCache;
 
 /**
  *
@@ -57,13 +61,17 @@ public class WeldClassFileInfo implements ClassFileInfo {
 
     private final boolean hasCdiConstructor;
 
+    private final LoadingCache<DotName, Set<String>> annotationClassAnnotationsCache;
+
     /**
      *
      * @param className
      * @param index
+     * @param annotationClassAnnotationsCache
      */
-    public WeldClassFileInfo(String className, CompositeIndex index) {
+    public WeldClassFileInfo(String className, CompositeIndex index, LoadingCache<DotName, Set<String>> annotationClassAnnotationsCache) {
         this.index = index;
+        this.annotationClassAnnotationsCache = annotationClassAnnotationsCache;
         this.classInfo = index.getClassByName(DotName.createSimple(className));
         if (this.classInfo == null) {
             throw WeldMessages.MESSAGES.nameNotFoundInIndex(className);
@@ -224,12 +232,12 @@ public class WeldClassFileInfo implements ClassFileInfo {
         }
         // Meta-annotations
         for (DotName annotation : classInfo.annotations().keySet()) {
-            ClassInfo annotationClassInfo = index.getClassByName(annotation);
-            if (annotationClassInfo == null) {
-                throw WeldMessages.MESSAGES.nameNotFoundInIndex(annotation.toString());
-            }
-            if (annotationClassInfo.annotations().containsKey(requiredAnnotationName)) {
-                return true;
+            try {
+                if (annotationClassAnnotationsCache.get(annotation).contains(requiredAnnotationName.toString())) {
+                    return true;
+                }
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
             }
         }
         // Superclass

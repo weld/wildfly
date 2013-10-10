@@ -22,6 +22,7 @@
 package org.jboss.as.weld.discovery;
 
 import java.io.IOException;
+import java.lang.annotation.Target;
 import java.lang.reflect.Modifier;
 
 import javax.enterprise.inject.Vetoed;
@@ -43,17 +44,19 @@ public class WeldClassFileServicesTest {
     private static ClassFileInfo alphaImpl;
     private static ClassFileInfo innerInterface;
     private static ClassFileInfo bravo;
+    private static ClassFileInfo charlie;
 
     @BeforeClass
     public static void init() throws IOException {
         ClassFileServices service = new WeldClassFileServices(IndexUtils.createIndex(Alpha.class, AlphaImpl.class, AbstractAlpha.class, InnerClasses.class,
-                Bravo.class, "org/jboss/as/weld/discovery/vetoed/package-info.class", Inject.class, Named.class));
+                Bravo.class, "org/jboss/as/weld/discovery/vetoed/package-info.class", Inject.class, Named.class, Charlie.class), Thread.currentThread()
+                .getContextClassLoader());
         alpha = service.getClassFileInfo(Alpha.class.getName());
         abstractAlpha = service.getClassFileInfo(AbstractAlpha.class.getName());
         alphaImpl = service.getClassFileInfo(AlphaImpl.class.getName());
         innerInterface = service.getClassFileInfo(InnerClasses.InnerInterface.class.getName());
         bravo = service.getClassFileInfo(Bravo.class.getName());
-
+        charlie = service.getClassFileInfo(Charlie.class.getName());
     }
 
     @Test
@@ -141,5 +144,11 @@ public class WeldClassFileServicesTest {
         Assert.assertFalse(bravo.containsAnnotation(Vetoed.class));
         Assert.assertFalse(bravo.containsAnnotation(Named.class));
         Assert.assertTrue(bravo.containsAnnotation(Inject.class));
+    }
+
+    @Test
+    public void testContainsAnnotationReflectionFallback() {
+        Assert.assertTrue(charlie.containsAnnotation(Target.class));
+        Assert.assertTrue(bravo.containsAnnotation(Target.class));
     }
 }
