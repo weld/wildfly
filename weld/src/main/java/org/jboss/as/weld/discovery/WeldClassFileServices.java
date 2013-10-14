@@ -68,6 +68,7 @@ public class WeldClassFileServices implements ClassFileServices {
     /**
      *
      * @param index
+     * @param momoduleClassLoader
      */
     public WeldClassFileServices(CompositeIndex index, ClassLoader moduleClassLoader) {
         if (index == null) {

@@ -132,4 +132,9 @@ public interface WeldLogger extends BasicLogger {
     @LogMessage(level = Logger.Level.DEBUG)
     @Message(value = "Discovered %s", id = Message.NONE)
     void beanArchiveDiscovered(BeanDeploymentArchive bda);
+
+    @LogMessage(level = Logger.Level.TRACE)
+    @Message(value = "Class info not found in the index - try to load class %s", id = 16018)
+    void classInfoNotFoundInIndex(String className);
+
 }

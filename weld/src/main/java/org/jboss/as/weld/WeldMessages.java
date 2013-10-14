@@ -145,7 +145,10 @@ public interface WeldMessages {
     @Message(id = 16079, value = "%s cannot be used at runtime")
     IllegalStateException cannotUseAtRuntime(String description);
 
-    @Message(id = 16080, value = "%s was not found in composite index")
+    @Message(id = 16080, value = "%s was not found in the index")
     ClassFileInfoException nameNotFoundInIndex(String name);
+
+    @Message(id = 16081, value = "Unable to load class: %s")
+    ClassFileInfoException unableToLoadClass(String className);
 
 }

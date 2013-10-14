@@ -25,6 +25,7 @@ import javax.enterprise.inject.Vetoed;
 import javax.inject.Inject;
 
 import org.jboss.as.server.deployment.annotation.CompositeIndex;
+import org.jboss.as.weld.WeldLogger;
 import org.jboss.as.weld.WeldMessages;
 import org.jboss.as.weld.util.Reflections;
 import org.jboss.jandex.AnnotationInstance;
@@ -33,7 +34,6 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 import org.jboss.weld.resources.spi.ClassFileInfo;
-import org.jboss.weld.resources.spi.ClassFileInfoException;
 
 import com.google.common.cache.LoadingCache;
 
@@ -198,7 +198,8 @@ public class WeldClassFileInfo implements ClassFileInfo {
     /**
      * @param className
      * @param fromClass
-     * @return
+     * @return <code>true</code> if the <code>className</code> is equal to the given <code>fromClass</code> name, or if the <code>className</code> represents a superclass or superinterface of the <code>fromClass</code>,
+     *         <code>false</code> otherwise
      */
     private boolean isAssignableFrom(String className, Class<?> fromClass) {
         if (className.equals(fromClass.getName())) {
@@ -223,13 +224,13 @@ public class WeldClassFileInfo implements ClassFileInfo {
     }
 
     /**
-     * @param to
+     * @param toClass
      * @param name
-     * @return <code>true</code> if the name is equal to the fromName, or if the name represents a superclass or superinterface of the fromName,
+     * @return <code>true</code> if the <code>name</code> is equal to the <code>toClass</code>, or if the name represents a subclass or subinterface of the <code>toClass</code>,
      *         <code>false</code> otherwise
      */
-    private boolean isAssignableTo(DotName name, Class<?> to) {
-        if (to.getName().equals(name.toString())) {
+    private boolean isAssignableTo(DotName name, Class<?> toClass) {
+        if (toClass.getName().equals(name.toString())) {
             return true;
         }
         if (OBJECT_NAME.equals(name)) {
@@ -240,18 +241,18 @@ public class WeldClassFileInfo implements ClassFileInfo {
         if (fromClassInfo == null) {
             // We reached a class that is not in the index. Let's use reflection.
             final Class<?> clazz = loadClass(name.toString());
-            return to.isAssignableFrom(clazz);
+            return toClass.isAssignableFrom(clazz);
         }
 
         DotName superName = fromClassInfo.superName();
 
-        if (superName != null && isAssignableTo(superName, to)) {
+        if (superName != null && isAssignableTo(superName, toClass)) {
             return true;
         }
 
         if (fromClassInfo.interfaces() != null) {
             for (DotName interfaceName : fromClassInfo.interfaces()) {
-                if (isAssignableTo(interfaceName, to)) {
+                if (isAssignableTo(interfaceName, toClass)) {
                     return true;
                 }
             }
@@ -292,10 +293,10 @@ public class WeldClassFileInfo implements ClassFileInfo {
     }
 
     private Class<?> loadClass(String className) {
-        // TODO: log a trace message for debugging
+        WeldLogger.ROOT_LOGGER.classInfoNotFoundInIndex(className);
         final Class<?> clazz = Reflections.loadClass(className, classLoader);
         if (clazz == null) {
-            throw new ClassFileInfoException("Unable to load class " + className); // TODO: localize properly
+            throw WeldMessages.MESSAGES.unableToLoadClass(className);
         }
         return clazz;
     }
