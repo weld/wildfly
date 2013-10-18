@@ -81,7 +81,7 @@ public class WeldClassFileInfo implements ClassFileInfo {
             throw WeldMessages.MESSAGES.nameNotFoundInIndex(className);
         }
         this.isVetoed = isVetoedTypeOrPackage();
-        this.hasCdiConstructor = this.classInfo.isTopLevelWithNoArgsConstructor() || hasInjectConstructor();
+        this.hasCdiConstructor = this.classInfo.hasNoArgsConstructor() || hasInjectConstructor();
         this.classLoader = classLoader;
     }
 
