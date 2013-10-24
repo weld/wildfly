@@ -32,6 +32,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 
 import org.jboss.as.ee.component.ComponentDescription;
+import org.jboss.as.ee.managedbean.component.ManagedBeanComponentDescription;
 import org.jboss.as.ejb3.component.EJBComponentDescription;
 import org.jboss.as.ejb3.component.messagedriven.MessageDrivenComponentDescription;
 import org.jboss.as.web.common.WebComponentDescription;
@@ -128,8 +129,8 @@ public class WeldComponentService implements Service<WeldComponentService> {
                 }
             }
 
-            final boolean cdiHandlesInterception = !(componentDescription instanceof EJBComponentDescription);
-            BasicInjectionTarget injectionTarget = InjectionTargets.createInjectionTarget(componentClass, bean, beanManager, cdiHandlesInterception);
+            final boolean isComponentWithView = (componentDescription instanceof EJBComponentDescription || componentDescription instanceof ManagedBeanComponentDescription);
+            BasicInjectionTarget injectionTarget = InjectionTargets.createInjectionTarget(componentClass, bean, beanManager, !isComponentWithView);
             if (componentDescription instanceof MessageDrivenComponentDescription || componentDescription instanceof WebComponentDescription) {
                 // fire ProcessInjectionTarget for non-contextual components
                 this.injectionTarget = beanManager.fireProcessInjectionTarget(injectionTarget.getAnnotated(), injectionTarget);
