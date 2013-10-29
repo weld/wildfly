@@ -1,3 +1,24 @@
+/*
+ * JBoss, Home of Professional Open Source.
+ * Copyright 2013, Red Hat, Inc., and individual contributors
+ * as indicated by the @author tags. See the copyright.txt file in the
+ * distribution for a full listing of individual contributors.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ */
 package org.jboss.as.test.integration.ee.injection.support.websocket;
 
 import java.net.URI;
@@ -13,6 +34,7 @@ import org.jboss.as.test.integration.ee.injection.support.ComponentInterceptor;
 import org.jboss.as.test.integration.ee.injection.support.ComponentInterceptorBinding;
 import org.jboss.as.test.shared.TestSuiteEnvironment;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,33 +54,31 @@ public class WebSocketInjectionSupportTestCase {
                 .create(WebArchive.class, "websocket.war")
                 .addPackage(WebSocketInjectionSupportTestCase.class.getPackage())
                 .addClasses(TestSuiteEnvironment.class, Alpha.class, Bravo.class, ComponentInterceptorBinding.class,
-                        ComponentInterceptor.class);
+                        ComponentInterceptor.class)
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
     }
 
-    // TODO merge both methods into one, or make them be run after common creation of endpoints
 
     @Test
-    public void testWebSocketInjection() throws Exception {
-        ServerContainer serverContainer = (ServerContainer) new InitialContext().lookup(SERVER_CONTAINER_JNDI_NAME);
-        serverContainer.connectToServer(AnnotatedClient.class, new URI("ws", "", TestSuiteEnvironment.getServerAddress(), 8080,
-                "/websocket/websocket/cruel", "", ""));
+    public void testWebSocketInjectionAndInterception() throws Exception {
+        AnnotatedClient.reset();
+        AnnotatedEndpoint.reset();
+        ComponentInterceptor.resetInterceptions();
+
+        final ServerContainer serverContainer = (ServerContainer) new InitialContext().lookup(SERVER_CONTAINER_JNDI_NAME);
+        serverContainer.connectToServer(AnnotatedClient.class, new URI("ws", "", TestSuiteEnvironment.getServerAddress(), 8080, "/websocket/websocket/cruel", "", ""));
+
+        Assert.assertEquals("Hello cruel World", AnnotatedClient.getMessage());
+
         Assert.assertTrue("Client endpoint's injection not correct.", AnnotatedClient.injectionOK);
         Assert.assertTrue("Server endpoint's injection not correct.", AnnotatedEndpoint.injectionOK);
-    }
-
-    @Test
-    public void testWebSocketInterception() throws Exception {
-        AnnotatedClient.reset();
-        ComponentInterceptor.resetInterceptions();
-        ServerContainer serverContainer = (ServerContainer) new InitialContext().lookup(SERVER_CONTAINER_JNDI_NAME);
-        serverContainer.connectToServer(AnnotatedClient.class, new URI("ws", "", TestSuiteEnvironment.getServerAddress(), 8080,
-                "/websocket/websocket/cruel", "", ""));
+        
         Assert.assertTrue("PostConstruct method on client endpoint instance not called.", AnnotatedClient.postConstructCalled);
         Assert.assertTrue("PostConstruct method on server endpoint instance not called.", AnnotatedEndpoint.postConstructCalled);
 
+
         Assert.assertEquals(2, ComponentInterceptor.getInterceptions().size());
         Assert.assertEquals("open", ComponentInterceptor.getInterceptions().get(0).getMethodName());
-        Assert.assertEquals("intercept", ComponentInterceptor.getInterceptions().get(1).getMethodName());
-        Assert.assertEquals("Hello cruel World", AnnotatedClient.getMessage());
+        Assert.assertEquals("message", ComponentInterceptor.getInterceptions().get(1).getMethodName());
     }
 }
