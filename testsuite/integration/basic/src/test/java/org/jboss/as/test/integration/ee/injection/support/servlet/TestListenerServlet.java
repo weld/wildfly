@@ -48,8 +48,8 @@ public class TestListenerServlet extends HttpServlet {
             resp.getWriter().append("" + ComponentInterceptor.getInterceptions().size());
         } else if ("interceptorVerify".equals(mode)) {
             assertEquals("Listener invocation not intercepted", 2, ComponentInterceptor.getInterceptions().size());
-            assertEquals("requestInitialized", ComponentInterceptor.getInterceptions().get(0).getMethodName());
-            assertEquals("requestDestroyed", ComponentInterceptor.getInterceptions().get(1).getMethodName());
+            assertEquals("requestDestroyed", ComponentInterceptor.getInterceptions().get(0).getMethodName());
+            assertEquals("requestInitialized", ComponentInterceptor.getInterceptions().get(1).getMethodName());
             resp.getWriter().append("" + ComponentInterceptor.getInterceptions().size());
         } else {
             resp.setStatus(404);

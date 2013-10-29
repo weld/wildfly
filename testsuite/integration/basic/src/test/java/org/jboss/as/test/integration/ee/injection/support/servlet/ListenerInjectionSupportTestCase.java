@@ -57,7 +57,7 @@ public class ListenerInjectionSupportTestCase extends InjectionSupportTestCase {
     public void testInterceptor() throws IOException, ExecutionException, TimeoutException {
         // ServletRequestListener.requestInitialized(ServletRequestEvent) and ServletRequestListener.requestDestroyed(ServletRequestEvent) must be intercepted
         assertEquals("0", doGetRequest("/TestListenerServlet?mode=interceptorReset"));
-        assertEquals("1", doGetRequest("/TestListenerServlet?mode=interceptorVerify"));
+        assertEquals("2", doGetRequest("/TestListenerServlet?mode=interceptorVerify"));
     }
 
 }
