@@ -41,7 +41,7 @@ public abstract class InjectionSupportTestCase {
 
     protected static WebArchive createTestArchiveBase() {
         return ShrinkWrap.create(WebArchive.class)
-                .addClasses(Alpha.class, Bravo.class, ComponentInterceptorBinding.class, ComponentInterceptor.class, InjectionSupportTestCase.class)
+                .addClasses(Alpha.class, Bravo.class, Charlie.class, ComponentInterceptorBinding.class, ComponentInterceptor.class, InjectionSupportTestCase.class)
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
     }
 

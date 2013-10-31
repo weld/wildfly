@@ -30,7 +30,7 @@ import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.WebConnection;
 
 import org.jboss.as.test.integration.ee.injection.support.Alpha;
-import org.jboss.as.test.integration.ee.injection.support.Bravo;
+import org.jboss.as.test.integration.ee.injection.support.Charlie;
 import org.jboss.as.test.integration.ee.injection.support.ComponentInterceptorBinding;
 
 /**
@@ -43,7 +43,7 @@ public class TestHttpUpgradeHandler implements HttpUpgradeHandler {
     @Inject
     private Alpha alpha;
 
-    private Bravo bravo;
+    private Charlie charlie;
 
     private boolean postConstructCallbackInvoked = false;
 
@@ -57,8 +57,8 @@ public class TestHttpUpgradeHandler implements HttpUpgradeHandler {
     }
 
     @Inject
-    public void setBravo(Bravo bravo) {
-        this.bravo = bravo;
+    public void setBravo(Charlie charlie) {
+        this.charlie = charlie;
     }
 
     @ComponentInterceptorBinding
@@ -66,7 +66,7 @@ public class TestHttpUpgradeHandler implements HttpUpgradeHandler {
     public void init(WebConnection wc) {
         System.out.println("Init upgrade handler");
         try {
-            injectionOk = (alpha != null && bravo != null && alpha.getId().equals(bravo.getAlphaId()));
+            injectionOk = (alpha != null && charlie != null && alpha.getId().equals(charlie.getAlphaId()));
         } catch (Exception e) {
             // e.printStackTrace();
         }

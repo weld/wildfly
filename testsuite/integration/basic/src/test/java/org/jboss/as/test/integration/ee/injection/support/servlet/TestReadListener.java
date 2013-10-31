@@ -21,7 +21,9 @@
  */
 package org.jboss.as.test.integration.ee.injection.support.servlet;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.List;
 
@@ -37,7 +39,6 @@ public class TestReadListener implements ReadListener {
     private final TestHttpUpgradeHandler handler;
 
     public TestReadListener(TestHttpUpgradeHandler handler) {
-        super();
         if (handler == null) {
             throw new IllegalArgumentException("No upgrade handler set");
         }
@@ -46,6 +47,10 @@ public class TestReadListener implements ReadListener {
 
     @Override
     public void onDataAvailable() throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(handler.getWebConnection().getInputStream()));
+        while ((reader.readLine()) != null) {
+            // read the input stream
+        }
         OutputStream out = handler.getWebConnection().getOutputStream();
         write(out, "isPostConstructCallbackInvoked: " + handler.isPostConstructCallbackInvoked() + LINE_SEPARATOR);
         write(out, "isInjectionOk: " + handler.isInjectionOk() + LINE_SEPARATOR);
