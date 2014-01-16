@@ -16,6 +16,8 @@
  */
 package org.jboss.as.weld.services.bootstrap;
 
+import static org.jboss.weld.logging.messages.BeanMessage.INVALID_RESOURCE_PRODUCER_TYPE;
+
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,10 +32,10 @@ import org.jboss.as.naming.ManagedReferenceFactory;
 import org.jboss.as.naming.deployment.ContextNames;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceRegistry;
+import org.jboss.weld.exceptions.DefinitionException;
 import org.jboss.weld.injection.spi.ResourceReference;
 import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 import org.jboss.weld.injection.spi.helpers.SimpleResourceReference;
-import org.jboss.weld.logging.BeanLogger;
 import org.jboss.weld.util.reflection.HierarchyDiscovery;
 import org.jboss.weld.util.reflection.Reflections;
 import org.wildfly.security.manager.WildFlySecurityManager;
@@ -124,7 +126,9 @@ public abstract class AbstractResourceInjectionServices {
         } else if (injectionPointRawType.isPrimitive() && BOXED_TYPES.get(injectionPointRawType).equals(resourceType)) {
             return;
         }
-        throw BeanLogger.LOG.invalidResourceProducerType(injectionPoint.getAnnotated(), resourceType.getName());
+        throw new DefinitionException(INVALID_RESOURCE_PRODUCER_TYPE, injectionPoint.getAnnotated(),
+                resourceType.getName());
+        // FIXME throw BeanLogger.LOG.invalidResourceProducerType(injectionPoint.getAnnotated(), resourceType.getName());
     }
 
     protected ResourceReferenceFactory<Object> createLazyResourceReferenceFactory(final ContextNames.BindInfo ejbBindInfo) {

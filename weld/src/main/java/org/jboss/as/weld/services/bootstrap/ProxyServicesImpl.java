@@ -29,7 +29,8 @@ import java.security.PrivilegedExceptionAction;
 import org.jboss.as.server.moduleservice.ServiceModuleLoader;
 import org.jboss.modules.Module;
 import org.jboss.modules.ModuleClassLoader;
-import org.jboss.weld.logging.BeanLogger;
+import org.jboss.weld.exceptions.WeldException;
+import org.jboss.weld.logging.messages.BeanMessage;
 import org.jboss.weld.serialization.spi.ProxyServices;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
@@ -96,7 +97,8 @@ public class ProxyServicesImpl implements ProxyServices {
                 }
             });
         } catch (PrivilegedActionException pae) {
-            throw BeanLogger.LOG.cannotLoadClass(className, pae.getException());
+            throw new WeldException(BeanMessage.CANNOT_LOAD_CLASS, className, pae.getException());
+            // FIXME throw BeanLogger.LOG.cannotLoadClass(className, pae.getException());
         }
     }
 
