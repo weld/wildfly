@@ -320,7 +320,7 @@ public class WeldDeploymentProcessor implements DeploymentUnitProcessor {
         final boolean nonPortableMode = parentDeploymentUnit.getAttachment(WeldConfiguration.ATTACHMENT_KEY).isNonPortableMode();
         final ResourceLoader resourceLoader = deployment.getServices().get(ResourceLoader.class);
         deployment.getServices().add(BootstrapConfiguration.class, new FileBasedBootstrapConfiguration(resourceLoader) {
-            @Override
+            // FIXME @Override
             public boolean isNonPortableModeEnabled() {
                 return nonPortableMode;
             }

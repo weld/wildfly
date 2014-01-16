@@ -22,6 +22,7 @@
 package org.jboss.as.weld.services.bootstrap;
 
 import static org.jboss.as.weld.util.ResourceInjectionUtilities.getResourceAnnotated;
+import static org.jboss.weld.logging.messages.BeanMessage.INVALID_RESOURCE_PRODUCER_TYPE;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.ParameterizedType;
@@ -39,9 +40,9 @@ import org.jboss.as.webservices.webserviceref.WSRefAnnotationWrapper;
 import org.jboss.as.webservices.webserviceref.WebServiceReferences;
 import org.jboss.as.weld.WeldMessages;
 import org.jboss.as.weld.util.ResourceInjectionUtilities;
+import org.jboss.weld.exceptions.DefinitionException;
 import org.jboss.weld.injection.spi.JaxwsInjectionServices;
 import org.jboss.weld.injection.spi.ResourceReferenceFactory;
-import org.jboss.weld.logging.BeanLogger;
 import org.jboss.weld.util.reflection.Reflections;
 
 /**
@@ -94,7 +95,9 @@ public class WeldJaxwsInjectionServices implements JaxwsInjectionServices {
             return;
         }
         if (!rawType.isAnnotationPresent(WebService.class)) {
-            throw BeanLogger.LOG.invalidResourceProducerType(ip.getAnnotated(), annotation.value());
+            throw new DefinitionException(INVALID_RESOURCE_PRODUCER_TYPE, ip.getAnnotated(),
+                    annotation.value());
+            // FIXME throw BeanLogger.LOG.invalidResourceProducerType(ip.getAnnotated(), annotation.value());
         }
     }
 

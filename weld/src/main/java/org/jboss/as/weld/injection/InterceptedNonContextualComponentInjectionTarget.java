@@ -60,7 +60,8 @@ class InterceptedNonContextualComponentInjectionTarget<T> extends BasicInjection
             DefaultInstantiator<T> delegate = (DefaultInstantiator<T>) getInstantiator();
             setInstantiator(new SubclassedComponentInstantiator<T>(annotatedType, getBean(), delegate, beanManager));
             if (hasNonConstructorInterceptors) {
-                setInstantiator(new InterceptorApplyingInstantiator<T>(getInstantiator(), interceptionModel, getType()));
+                setInstantiator(new InterceptorApplyingInstantiator<T>(getInstantiator(), interceptionModel));
+                // FIXME setInstantiator(new InterceptorApplyingInstantiator<T>(getInstantiator(), interceptionModel, getType()));
             }
         }
 
@@ -76,7 +77,8 @@ class InterceptedNonContextualComponentInjectionTarget<T> extends BasicInjection
 
     private void setupConstructorInterceptionInstantiator(InterceptionModel<ClassMetadata<?>> interceptionModel) {
         if (interceptionModel != null && interceptionModel.hasExternalConstructorInterceptors()) {
-            setInstantiator(new ConstructorInterceptionInstantiator<T>(getInstantiator(), interceptionModel, getType()));
+            setInstantiator(new ConstructorInterceptionInstantiator<T>(getInstantiator(), interceptionModel));
+            // FIXME setInstantiator(new ConstructorInterceptionInstantiator<T>(getInstantiator(), interceptionModel, getType()));
         }
     }
 

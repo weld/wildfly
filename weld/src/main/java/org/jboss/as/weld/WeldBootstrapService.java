@@ -111,8 +111,10 @@ public class WeldBootstrapService implements Service<WeldBootstrapService> {
         ClassLoader oldTccl = WildFlySecurityManager.getCurrentContextClassLoaderPrivileged();
         try {
             WildFlySecurityManager.setCurrentContextClassLoaderPrivileged(deployment.getModule().getClassLoader());
-            bootstrap.startContainer(deploymentName, environment, deployment);
-            WeldProvider.containerInitialized(Container.instance(deploymentName), getBeanManager(), deployment);
+            bootstrap.startContainer(environment, deployment);
+            // FIXME bootstrap.startContainer(deploymentName, environment, deployment);
+            WeldProvider.containerInitialized(Container.instance(), getBeanManager(), deployment, deploymentName);
+            // FIXME WeldProvider.containerInitialized(Container.instance(deploymentName), getBeanManager(), deployment);
         } finally {
             WildFlySecurityManager.setCurrentContextClassLoaderPrivileged(oldTccl);
         }
@@ -132,7 +134,8 @@ public class WeldBootstrapService implements Service<WeldBootstrapService> {
         ClassLoader oldTccl = WildFlySecurityManager.getCurrentContextClassLoaderPrivileged();
         try {
             WildFlySecurityManager.setCurrentContextClassLoaderPrivileged(deployment.getModule().getClassLoader());
-            WeldProvider.containerShutDown(Container.instance(deploymentName));
+            WeldProvider.containerShutDown(Container.instance());
+            // FIXME WeldProvider.containerShutDown(Container.instance(deploymentName));
             bootstrap.shutdown();
         } finally {
             WildFlySecurityManager.setCurrentContextClassLoaderPrivileged(oldTccl);

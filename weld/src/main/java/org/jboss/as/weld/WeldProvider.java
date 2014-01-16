@@ -34,7 +34,8 @@ import org.jboss.weld.ContainerState;
 import org.jboss.weld.Weld;
 import org.jboss.weld.bean.builtin.BeanManagerProxy;
 import org.jboss.weld.bootstrap.spi.BeanDeploymentArchive;
-import org.jboss.weld.logging.BeanManagerLogger;
+import org.jboss.weld.exceptions.IllegalStateException;
+import org.jboss.weld.logging.messages.BeanManagerMessage;
 import org.jboss.weld.manager.BeanManagerImpl;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
@@ -48,8 +49,8 @@ public class WeldProvider implements CDIProvider {
 
     private static final ConcurrentMap<Container, CdiImpl> containers = new ConcurrentHashMap<>();
 
-    static void containerInitialized(Container container, BeanManagerImpl rootBeanManager, WeldDeployment deployment) {
-        containers.put(container, new WeldProvider.CdiImpl(container, new BeanManagerProxy(rootBeanManager), deployment));
+    static void containerInitialized(Container container, BeanManagerImpl rootBeanManager, WeldDeployment deployment, String deploymentName) {
+        containers.put(container, new WeldProvider.CdiImpl(container, new BeanManagerProxy(rootBeanManager), deployment, deploymentName));
     }
 
     static void containerShutDown(Container container) {
@@ -66,7 +67,8 @@ public class WeldProvider implements CDIProvider {
     private static void checkContainerState(Container container) {
         ContainerState state = container.getState();
         if (state.equals(ContainerState.STOPPED) || state.equals(ContainerState.SHUTDOWN)) {
-            throw BeanManagerLogger.LOG.beanManagerNotAvailable();
+            // throw BeanManagerLogger.LOG.beanManagerNotAvailable();
+            throw new IllegalStateException(BeanManagerMessage.BEAN_MANAGER_NOT_AVAILABLE);
         }
     }
 
@@ -76,10 +78,15 @@ public class WeldProvider implements CDIProvider {
         private final BeanManagerProxy rootBeanManager;
         private final WeldDeployment deployment;
 
-        public CdiImpl(Container container, BeanManagerProxy rootBeanManager, WeldDeployment deployment) {
+        // FIXME
+        private final String deploymentName;
+
+        public CdiImpl(Container container, BeanManagerProxy rootBeanManager, WeldDeployment deployment, String deploymentName) {
             this.container = container;
             this.rootBeanManager = rootBeanManager;
             this.deployment = deployment;
+
+            this.deploymentName = deploymentName;
         }
 
         @Override
@@ -101,7 +108,8 @@ public class WeldProvider implements CDIProvider {
 
         @Override
         public String toString() {
-            return "Weld instance for deployment " + BeanManagerProxy.unwrap(rootBeanManager).getContextId();
+            return "Weld instance for deployment " + deploymentName;
+            // FIXME return "Weld instance for deployment " + BeanManagerProxy.unwrap(rootBeanManager).getContextId();
         }
     }
 }

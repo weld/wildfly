@@ -49,7 +49,6 @@ import org.jboss.metadata.web.spec.ListenerMetaData;
 import org.jboss.weld.servlet.ConversationFilter;
 import org.jboss.weld.servlet.WeldInitialListener;
 import org.jboss.weld.servlet.WeldTerminalListener;
-import org.jboss.weld.servlet.api.InitParameters;
 
 /**
  * Deployment processor that integrates weld into the web tier
@@ -140,9 +139,9 @@ public class WebIntegrationProcessor implements DeploymentUnitProcessor {
         if (webMetaData.getContextParams() == null) {
             webMetaData.setContextParams(new ArrayList<ParamValueMetaData>());
         }
-        final List<ParamValueMetaData> contextParams = webMetaData.getContextParams();
-        setupWeldContextIgnores(contextParams, InitParameters.CONTEXT_IGNORE_FORWARD);
-        setupWeldContextIgnores(contextParams, InitParameters.CONTEXT_IGNORE_INCLUDE);
+        // FIXME final List<ParamValueMetaData> contextParams = webMetaData.getContextParams();
+        // FIXME setupWeldContextIgnores(contextParams, InitParameters.CONTEXT_IGNORE_FORWARD);
+        // FIXME setupWeldContextIgnores(contextParams, InitParameters.CONTEXT_IGNORE_INCLUDE);
 
         if (webMetaData.getFilterMappings() != null) {
             // register ConversationFilter
