@@ -1321,6 +1321,10 @@
             <maven-resource group="org.jboss.weld" artifact="weld-core-impl"/>
         </module-def>
 
+        <module-def name="org.jboss.weld.probe">
+            <maven-resource group="org.jboss.weld.probe" artifact="weld-probe-core"/>
+        </module-def>
+
         <module-def name="org.jboss.weld.api">
             <maven-resource group="org.jboss.weld" artifact="weld-api"/>
         </module-def>

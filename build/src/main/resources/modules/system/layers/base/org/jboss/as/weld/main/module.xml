@@ -72,6 +72,7 @@
         <module name="org.jboss.vfs"/>
         <module name="org.jboss.weld.api" />
         <module name="org.jboss.weld.core" />
+        <module name="org.jboss.weld.probe" />
         <module name="org.jboss.weld.spi" />
         <module name="org.slf4j" />
         <module name="org.slf4j.ext" />
