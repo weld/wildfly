@@ -42,6 +42,7 @@ import org.jboss.weld.bootstrap.WeldBootstrap;
 import org.jboss.weld.bootstrap.api.Environment;
 import org.jboss.weld.bootstrap.spi.BeanDeploymentArchive;
 import org.jboss.weld.manager.BeanManagerImpl;
+import org.jboss.weld.probe.Probe;
 import org.jboss.weld.security.spi.SecurityServices;
 import org.jboss.weld.transaction.spi.TransactionServices;
 import org.wildfly.security.manager.WildFlySecurityManager;
@@ -66,10 +67,11 @@ public class WeldBootstrapService implements Service<WeldBootstrapService> {
 
     private final InjectedValue<WeldSecurityServices> securityServices = new InjectedValue<WeldSecurityServices>();
     private final InjectedValue<WeldTransactionServices> weldTransactionServices = new InjectedValue<WeldTransactionServices>();
+    private final boolean developmentMode;
 
     private volatile boolean started;
 
-    public WeldBootstrapService(WeldDeployment deployment, Environment environment, final String deploymentName) {
+    public WeldBootstrapService(WeldDeployment deployment, Environment environment, final String deploymentName, boolean developmentMode) {
         this.deployment = deployment;
         this.environment = environment;
         this.deploymentName = deploymentName;
@@ -87,6 +89,7 @@ public class WeldBootstrapService implements Service<WeldBootstrapService> {
         }
         this.rootBeanDeploymentArchive = rootBeanDeploymentArchive;
         this.beanDeploymentArchives = Collections.unmodifiableMap(bdas);
+        this.developmentMode = developmentMode;
     }
 
     /**
@@ -104,6 +107,11 @@ public class WeldBootstrapService implements Service<WeldBootstrapService> {
         // set up injected services
         addWeldService(SecurityServices.class, securityServices.getValue());
         addWeldService(TransactionServices.class, weldTransactionServices.getValue());
+
+        // probe service
+        if (developmentMode) {
+            addWeldService(Probe.class, new Probe());
+        }
 
         ModuleGroupSingletonProvider.addClassLoaders(deployment.getModule().getClassLoader(),
                 deployment.getSubDeploymentClassLoaders());
