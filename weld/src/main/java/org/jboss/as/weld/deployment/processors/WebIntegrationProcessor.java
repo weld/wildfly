@@ -21,6 +21,8 @@
  */
 package org.jboss.as.weld.deployment.processors;
 
+import static org.jboss.as.weld.util.Utils.registerAsComponent;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -37,7 +39,6 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.web.common.ExpressionFactoryWrapper;
 import org.jboss.as.web.common.WarMetaData;
-import org.jboss.as.web.common.WebComponentDescription;
 import org.jboss.as.weld.WeldStartService;
 import org.jboss.as.weld.logging.WeldLogger;
 import org.jboss.as.weld.webtier.jsp.WeldJspExpressionFactoryWrapper;
@@ -202,11 +203,5 @@ public class WebIntegrationProcessor implements DeploymentUnitProcessor {
 
     @Override
     public void undeploy(DeploymentUnit context) {
-    }
-
-    private void registerAsComponent(String listener, EEModuleDescription module, DeploymentUnit deploymentUnit, EEApplicationClasses applicationClasses) {
-        final WebComponentDescription componentDescription = new WebComponentDescription(listener, listener, module, deploymentUnit.getServiceName(), applicationClasses);
-        module.addComponent(componentDescription);
-        deploymentUnit.addToAttachmentList(WebComponentDescription.WEB_COMPONENTS, componentDescription.getStartServiceName());
     }
 }

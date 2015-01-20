@@ -61,4 +61,9 @@ public class WeldAttachments {
      */
     public static final AttachmentKey<ResourceRoot> CLASSES_RESOURCE_ROOT = AttachmentKey.create(ResourceRoot.class);
 
+    /**
+     * Indicates whether Weld's development mode should be enabled or not.
+     */
+    public static final AttachmentKey<Boolean> DEVELOPMENT_MODE = AttachmentKey.create(Boolean.class);
+
 }
