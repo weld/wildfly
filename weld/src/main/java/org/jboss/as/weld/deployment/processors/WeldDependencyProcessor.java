@@ -22,8 +22,6 @@
 
 package org.jboss.as.weld.deployment.processors;
 
-import static org.jboss.as.weld.util.Utils.getRootDeploymentUnit;
-
 import org.jboss.as.ee.weld.WeldDeploymentMarker;
 import org.jboss.as.server.deployment.Attachments;
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
@@ -77,7 +75,7 @@ public class WeldDependencyProcessor implements DeploymentUnitProcessor {
         addDependency(moduleSpecification, moduleLoader, WELD_API_ID);
         addDependency(moduleSpecification, moduleLoader, WELD_SPI_ID);
 
-        if (Boolean.TRUE.equals(getRootDeploymentUnit(deploymentUnit).getAttachment(WeldAttachments.DEVELOPMENT_MODE))) {
+        if (Boolean.TRUE.equals(deploymentUnit.getAttachment(WeldAttachments.DEVELOPMENT_MODE))) {
             addDependency(moduleSpecification, moduleLoader, WELD_PROBE_ID);
         }
 
