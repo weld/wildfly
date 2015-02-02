@@ -16,6 +16,7 @@
  */
 package org.jboss.as.weld.deployment.processors;
 
+import static org.jboss.as.weld.util.Utils.getRootDeploymentUnit;
 import static org.jboss.as.weld.util.Utils.registerAsComponent;
 
 import java.util.ArrayList;
@@ -102,6 +103,7 @@ public class ProbeDeploymentProcessor implements DeploymentUnitProcessor {
             return;
         }
         deploymentUnit.putAttachment(WeldAttachments.DEVELOPMENT_MODE, true);
+        getRootDeploymentUnit(deploymentUnit).putAttachment(WeldAttachments.DEVELOPMENT_MODE, true);
 
         // Servlet
         if (webMetaData.getServlets() == null) {
