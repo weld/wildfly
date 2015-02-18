@@ -30,6 +30,7 @@
 
     <resources>
         <artifact name="${org.jboss.weld:weld-core-impl}"/>
+        <artifact name="${org.jboss.weld.probe:weld-probe-core}"/>
     </resources>
 
     <dependencies>
