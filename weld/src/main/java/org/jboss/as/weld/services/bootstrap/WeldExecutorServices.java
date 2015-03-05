@@ -29,7 +29,7 @@ import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 import org.jboss.threads.JBossThreadFactory;
-import org.jboss.weld.executor.AbstractExecutorServices;
+import org.jboss.weld.executor.AbstractManagedExecutorServices;
 import org.jboss.weld.manager.api.ExecutorServices;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
@@ -39,7 +39,7 @@ import org.wildfly.security.manager.WildFlySecurityManager;
  * @author Jozef Hartinger
  *
  */
-public class WeldExecutorServices extends AbstractExecutorServices implements Service<ExecutorServices> {
+public class WeldExecutorServices extends AbstractManagedExecutorServices implements Service<ExecutorServices> {
 
     public static final ServiceName SERVICE_NAME = Services.JBOSS_AS.append("weld", "executor");
     private static final String THREAD_NAME_PATTERN = "Weld Thread Pool -- %t";
