@@ -30,6 +30,9 @@
 
     <resources>
         <artifact name="${org.jboss.weld:weld-core-impl}"/>
+        <artifact name="${org.jboss.weld.module:weld-ejb}"/>
+        <artifact name="${org.jboss.weld.module:weld-jta}"/>
+        <artifact name="${org.jboss.weld.module:weld-web}"/>
     </resources>
 
     <dependencies>
