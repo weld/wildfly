@@ -146,7 +146,7 @@ public class ProbeDeploymentProcessor implements DeploymentUnitProcessor {
         if (webMetaData.getFilterMappings() == null) {
             webMetaData.setFilterMappings(new ArrayList<FilterMappingMetaData>());
         }
-        webMetaData.getFilterMappings().add(PROBE_FILTER_MAPPING);
+        webMetaData.getFilterMappings().add(0, PROBE_FILTER_MAPPING);
 
         // Injection into servlet and filter
         final EEModuleDescription module = deploymentUnit.getAttachment(Attachments.EE_MODULE_DESCRIPTION);
