@@ -35,8 +35,6 @@ import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 import org.jboss.msc.value.InjectedValue;
-import org.jboss.weld.manager.BeanManagerImpl;
-import org.jboss.weld.probe.Probe;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
 /**
@@ -95,13 +93,6 @@ public class WeldStartService implements Service<WeldStartService> {
             bootstrap.getValue().getBootstrap().deployBeans();
             bootstrap.getValue().getBootstrap().validateBeans();
             bootstrap.getValue().getBootstrap().endInitialization();
-
-            // Initialize probe
-            BeanManagerImpl manager = bootstrap.getValue().getBeanManager();
-            Probe probe = manager.getServices().get(Probe.class);
-            if (probe != null) {
-                probe.initialize(manager);
-            }
         } finally {
 
             for (SetupAction action : setupActions) {
