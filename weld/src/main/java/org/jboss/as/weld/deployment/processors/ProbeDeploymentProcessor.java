@@ -37,16 +37,12 @@ import org.jboss.as.web.common.WarMetaData;
 import org.jboss.as.weld.deployment.WeldAttachments;
 import org.jboss.as.weld.deployment.WeldPortableExtensions;
 import org.jboss.metadata.javaee.spec.ParamValueMetaData;
-import org.jboss.metadata.web.jboss.JBossServletMetaData;
-import org.jboss.metadata.web.jboss.JBossServletsMetaData;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.metadata.web.spec.DispatcherType;
 import org.jboss.metadata.web.spec.FilterMappingMetaData;
 import org.jboss.metadata.web.spec.FilterMetaData;
 import org.jboss.metadata.web.spec.FiltersMetaData;
-import org.jboss.metadata.web.spec.ServletMappingMetaData;
 import org.jboss.weld.probe.ProbeExtension;
-import org.jboss.weld.probe.ProbeServlet;
 
 /**
  * Registers weld-probe servlet and extension if weld development mode is enabled.
@@ -58,10 +54,7 @@ public class ProbeDeploymentProcessor implements DeploymentUnitProcessor {
 
     // This context param is used to activate the development mode
     private static final String CONTEXT_PARAM_DEV_MODE = "org.jboss.weld.development";
-    private static final String SERVLET_NAME = "weld-probe-servlet";
     private static final String FILTER_NAME = "weld-probe-filter";
-    private static final JBossServletMetaData PROBE_SERVLET;
-    private static final ServletMappingMetaData PROBE_SERVLET_MAPPING;
     private static final FilterMetaData PROBE_FILTER;
     private static final FilterMappingMetaData PROBE_FILTER_MAPPING;
 
@@ -69,15 +62,6 @@ public class ProbeDeploymentProcessor implements DeploymentUnitProcessor {
     private static final String FILTER_CLASS_NAME = "org.jboss.weld.probe.ProbeFilter";
 
     static {
-        PROBE_SERVLET = new JBossServletMetaData();
-        PROBE_SERVLET.setName(SERVLET_NAME);
-        PROBE_SERVLET.setServletClass(ProbeServlet.class.getName());
-        PROBE_SERVLET.setLoadOnStartup("1");
-
-        PROBE_SERVLET_MAPPING = new ServletMappingMetaData();
-        PROBE_SERVLET_MAPPING.setServletName(SERVLET_NAME);
-        PROBE_SERVLET_MAPPING.setUrlPatterns(Collections.singletonList("/weld-probe/*"));
-
         PROBE_FILTER = new FilterMetaData();
         PROBE_FILTER.setName(FILTER_NAME);
         PROBE_FILTER.setFilterClass(FILTER_CLASS_NAME);
@@ -124,18 +108,6 @@ public class ProbeDeploymentProcessor implements DeploymentUnitProcessor {
         deploymentUnit.putAttachment(WeldAttachments.DEVELOPMENT_MODE, true);
         getRootDeploymentUnit(deploymentUnit).putAttachment(WeldAttachments.DEVELOPMENT_MODE, true);
 
-        // Servlet
-        if (webMetaData.getServlets() == null) {
-            webMetaData.setServlets(new JBossServletsMetaData());
-        }
-        webMetaData.getServlets().add(PROBE_SERVLET);
-
-        // Servlet mapping
-        if (webMetaData.getServletMappings() == null) {
-            webMetaData.setServletMappings(new ArrayList<ServletMappingMetaData>());
-        }
-        webMetaData.getServletMappings().add(PROBE_SERVLET_MAPPING);
-
         // Filter
         if (webMetaData.getFilters() == null) {
             webMetaData.setFilters(new FiltersMetaData());
@@ -151,7 +123,6 @@ public class ProbeDeploymentProcessor implements DeploymentUnitProcessor {
         // Injection into servlet and filter
         final EEModuleDescription module = deploymentUnit.getAttachment(Attachments.EE_MODULE_DESCRIPTION);
         final EEApplicationClasses applicationClasses = deploymentUnit.getAttachment(Attachments.EE_APPLICATION_CLASSES_DESCRIPTION);
-        registerAsComponent(ProbeServlet.class.getName(), module, deploymentUnit, applicationClasses);
         registerAsComponent(FILTER_CLASS_NAME, module, deploymentUnit, applicationClasses);
 
         // ProbeExtension

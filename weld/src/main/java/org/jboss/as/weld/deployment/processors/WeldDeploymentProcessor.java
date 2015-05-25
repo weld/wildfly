@@ -235,11 +235,8 @@ public class WeldDeploymentProcessor implements DeploymentUnitProcessor {
         }
 
         final Collection<Metadata<Extension>> extensions = WeldPortableExtensions.getPortableExtensions(deploymentUnit).getExtensions();
-
         final WeldDeployment deployment = new WeldDeployment(beanDeploymentArchives, extensions, module, subDeploymentLoaders, deploymentUnit, rootBeanDeploymentModule);
-
-        final boolean developmentMode = Boolean.TRUE.equals(parent.getAttachment(WeldAttachments.DEVELOPMENT_MODE));
-        final WeldBootstrapService weldBootstrapService = new WeldBootstrapService(deployment, Environments.EE_INJECT, deploymentUnit.getName(), developmentMode);
+        final WeldBootstrapService weldBootstrapService = new WeldBootstrapService(deployment, Environments.EE_INJECT, deploymentUnit.getName());
 
         installBootstrapConfigurationService(deployment, parent);
 
