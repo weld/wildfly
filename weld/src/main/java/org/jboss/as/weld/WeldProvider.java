@@ -21,7 +21,6 @@
  */
 package org.jboss.as.weld;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -105,19 +104,6 @@ public class WeldProvider implements CDIProvider {
             return "Weld instance for deployment " + BeanManagerProxy.unwrap(rootBeanManager).getContextId();
         }
 
-        @Override
-        public void shutdown() {
-           throw new IllegalStateException();
-        }
     }
 
-    @Override
-    public boolean isInitialized() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public CDI<Object> initialize(Map<String, Object> params) {
-        throw new UnsupportedOperationException();
-    }
 }
