@@ -106,7 +106,7 @@
         <version.io.undertow.jastow>2.0.1.Final</version.io.undertow.jastow>
         <version.io.undertow.js>1.0.2.Final</version.io.undertow.js>
         <version.javax.activation>1.1.1</version.javax.activation>
-        <version.javax.enterprise>2.0-EDR2</version.javax.enterprise>
+        <version.javax.enterprise>2.0.Alpha6</version.javax.enterprise>
         <version.javax.jws.jsr181-api>1.0-MR1</version.javax.jws.jsr181-api>
         <version.javax.mail>1.5.5</version.javax.mail>
         <version.javax.validation>1.1.0.Final</version.javax.validation>
@@ -199,8 +199,8 @@
         <version.org.jboss.spec.javax.xml.soap.jboss-saaj-api_1.3_spec>1.0.3.Final</version.org.jboss.spec.javax.xml.soap.jboss-saaj-api_1.3_spec>
         <version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.2_spec>2.0.3.Final</version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.2_spec>
         <version.org.jboss.spec.javax.websockets>1.1.1.Final</version.org.jboss.spec.javax.websockets>
-        <version.org.jboss.weld.weld>3.0.0.Alpha17</version.org.jboss.weld.weld>
-        <version.org.jboss.weld.weld-api>3.0.Alpha22</version.org.jboss.weld.weld-api>
+        <version.org.jboss.weld.weld>3.0.0-SNAPSHOT</version.org.jboss.weld.weld>
+        <version.org.jboss.weld.weld-api>3.0.Alpha23</version.org.jboss.weld.weld-api>
         <version.org.jboss.ws.api>1.0.3.Final</version.org.jboss.ws.api>
         <version.org.jboss.ws.spi>3.1.2.Final</version.org.jboss.ws.spi>
         <version.org.jboss.ws.common>3.1.3.Final</version.org.jboss.ws.common>
