@@ -29,8 +29,8 @@ import org.jboss.invocation.InterceptorFactoryContext;
 import org.jboss.msc.service.ServiceContainer;
 import org.jboss.msc.service.ServiceName;
 import org.jboss.weld.context.ejb.EjbRequestContext;
-import org.jboss.weld.ejb.AbstractEJBRequestScopeActivationInterceptor;
 import org.jboss.weld.manager.BeanManagerImpl;
+import org.jboss.weld.module.ejb.AbstractEJBRequestScopeActivationInterceptor;
 
 /**
  * Interceptor for activating the CDI request scope on some EJB invocations.
