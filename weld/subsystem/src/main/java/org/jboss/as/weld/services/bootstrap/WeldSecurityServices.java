@@ -21,7 +21,11 @@
  */
 package org.jboss.as.weld.services.bootstrap;
 
+import static java.security.AccessController.doPrivileged;
+import static org.jboss.as.weld.util.PrivilegedActions.of;
+
 import java.security.Principal;
+import java.security.PrivilegedAction;
 
 import org.jboss.as.security.service.SimpleSecurityManager;
 import org.jboss.as.weld.ServiceNames;
@@ -32,8 +36,11 @@ import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 import org.jboss.msc.value.InjectedValue;
+import org.jboss.security.SecurityContext;
+import org.jboss.security.SecurityContextAssociation;
 import org.jboss.weld.security.spi.SecurityServices;
 import org.wildfly.security.auth.server.SecurityDomain;
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 public class WeldSecurityServices implements Service<WeldSecurityServices>, SecurityServices {
 
@@ -75,5 +82,53 @@ public class WeldSecurityServices implements Service<WeldSecurityServices>, Secu
 
     public InjectedValue<SimpleSecurityManager> getSecurityManagerValue() {
         return securityManagerValue;
+    }
+
+    @Override
+    public org.jboss.weld.security.spi.SecurityContext getSecurityContext() {
+        SecurityContext ctx;
+        if (WildFlySecurityManager.isChecking()) {
+            ctx = doPrivileged(of(SecurityContextAssociation::getSecurityContext));
+        } else {
+            ctx = SecurityContextAssociation.getSecurityContext();
+        }
+        return new WeldSecurityContext(ctx);
+    }
+
+    static class WeldSecurityContext implements org.jboss.weld.security.spi.SecurityContext, PrivilegedAction<Void> {
+
+        private final SecurityContext ctx;
+
+        WeldSecurityContext(SecurityContext ctx) {
+            this.ctx = ctx;
+        }
+
+        @Override
+        public void associate() {
+            if (WildFlySecurityManager.isChecking()) {
+                doPrivileged(of(this::run));
+            } else {
+                run();
+            }
+        }
+
+        @Override
+        public void dissociate() {
+            if (WildFlySecurityManager.isChecking()) {
+                doPrivileged(of(SecurityContextAssociation::clearSecurityContext));
+            } else {
+                SecurityContextAssociation.clearSecurityContext();
+            }
+        }
+
+        @Override
+        public void close() {
+        }
+
+        @Override
+        public Void run() {
+            SecurityContextAssociation.setSecurityContext(ctx);
+            return null;
+        }
     }
 }
