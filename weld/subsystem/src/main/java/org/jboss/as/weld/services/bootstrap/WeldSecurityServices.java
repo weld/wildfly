@@ -22,10 +22,12 @@
 package org.jboss.as.weld.services.bootstrap;
 
 import static java.security.AccessController.doPrivileged;
+
 import static org.jboss.as.weld.util.PrivilegedActions.of;
 
 import java.security.Principal;
 import java.security.PrivilegedAction;
+import java.util.function.Consumer;
 
 import org.jboss.as.security.service.SimpleSecurityManager;
 import org.jboss.as.weld.ServiceNames;
@@ -40,6 +42,7 @@ import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextAssociation;
 import org.jboss.weld.security.spi.SecurityServices;
 import org.wildfly.security.auth.server.SecurityDomain;
+import org.wildfly.security.auth.server.SecurityIdentity;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
 public class WeldSecurityServices implements Service<WeldSecurityServices>, SecurityServices {
@@ -65,7 +68,7 @@ public class WeldSecurityServices implements Service<WeldSecurityServices>, Secu
 
     @Override
     public Principal getPrincipal() {
-        SecurityDomain elytronDomain = SecurityDomain.getCurrent();
+        SecurityDomain elytronDomain = getCurrentSecurityDomain();
         if(elytronDomain != null) {
             return elytronDomain.getCurrentSecurityIdentity().getPrincipal();
         }
@@ -93,6 +96,26 @@ public class WeldSecurityServices implements Service<WeldSecurityServices>, Secu
             ctx = SecurityContextAssociation.getSecurityContext();
         }
         return new WeldSecurityContext(ctx);
+    }
+
+    @Override
+    public Consumer<Runnable> getSecurityContextAssociator(){
+        SecurityDomain elytronDomain = getCurrentSecurityDomain();
+        if(elytronDomain != null) {
+            // store the identity from the original thread and use it in callback which will be invoked in a different thread
+            SecurityIdentity storedSecurityIdentity = elytronDomain.getCurrentSecurityIdentity();
+            return (action) -> storedSecurityIdentity.runAs(action);
+        } else {
+            return SecurityServices.super.getSecurityContextAssociator();
+        }
+    }
+
+    private SecurityDomain getCurrentSecurityDomain() {
+        if (WildFlySecurityManager.isChecking()) {
+            return doPrivileged(of(() -> SecurityDomain.getCurrent()));
+        } else {
+            return SecurityDomain.getCurrent();
+        }
     }
 
     static class WeldSecurityContext implements org.jboss.weld.security.spi.SecurityContext, PrivilegedAction<Void> {
