@@ -1,3 +1,6 @@
+| :warning: This repository is archived! The fork was no longer used since Weld stopped delivering per-release version patches for WildFly. |
+| --- |
+
 WildFly Application Server
 ========================
 http://wildfly.org
